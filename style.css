@@ -1,0 +1,74 @@
+body {
+  font-family: "Segoe UI", sans-serif;
+  background: #f4f6f8;
+  padding: 20px;
+}
+
+.container {
+  max-width: 1100px;
+  margin: auto;
+  background: #fff;
+  padding: 20px 24px;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+}
+
+.month-bar {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 15px;
+}
+
+button {
+  padding: 6px 12px;
+  border: none;
+  border-radius: 6px;
+  background: #4CAF50;
+  color: white;
+  cursor: pointer;
+  font-size: 13px;
+}
+
+.secondary { background: #1e88e5; }
+.danger { background: #e53935; }
+
+.section {
+  margin-top: 20px;
+  padding: 14px;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+}
+
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+}
+
+.card {
+  background: #f9fafb;
+  padding: 12px;
+  border-radius: 8px;
+  border: 1px solid #e5e7eb;
+}
+
+.chart-box {
+  max-width: 300px;
+  margin: 0 auto;
+}
+
+.insights {
+  line-height: 1.6;
+  color: #444;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 10px;
+}
+
+th, td {
+  padding: 8px;
+  border-bottom: 1px solid #eee;
+}

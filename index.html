@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Premium Monthly Finance Tracker</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+
+<div class="container">
+  <h2>Premium Monthly Finance Tracker</h2>
+
+  <!-- Month Controls -->
+  <div class="month-bar">
+    <input type="month" id="monthPicker">
+    <button id="loadMonthBtn">Load Month</button>
+    <button id="carryForwardBtn" class="secondary">Carry Forward</button>
+    <button id="submitTodayBtn" class="danger">Submit Today (Lock)</button>
+    <button id="nextMonthBtn">Next Month</button>
+  </div>
+
+  <!-- Dashboard -->
+  <h3>Monthly Dashboard</h3>
+  <div class="dashboard-grid">
+    <div class="card">
+      <h4>Total Income</h4>
+      <p id="dashIncome">0</p>
+    </div>
+    <div class="card">
+      <h4>Total Expenses</h4>
+      <p id="dashExpenses">0</p>
+    </div>
+    <div class="card">
+      <h4>Savings</h4>
+      <p id="dashSavings">0</p>
+    </div>
+    <div class="card">
+      <h4>Balance</h4>
+      <p id="dashBalance">0</p>
+    </div>
+  </div>
+
+  <!-- Income -->
+  <div class="section">
+    <h3>Income</h3>
+    <input type="text" id="incomeName" placeholder="Source">
+    <input type="number" id="incomeAmount" placeholder="Amount">
+    <button onclick="addIncome()">Add Income</button>
+    <table>
+      <thead>
+        <tr><th>Source</th><th>Amount</th><th>Actions</th></tr>
+      </thead>
+      <tbody id="incomeTable"></tbody>
+    </table>
+  </div>
+
+  <!-- Categories -->
+  <div class="section">
+    <h3>Expense Categories</h3>
+    <input type="text" id="newCategory" placeholder="Category name">
+    <button onclick="addCategory()">Add Category</button>
+  </div>
+
+  <!-- Expenses -->
+  <div class="section">
+    <h3>Expenses</h3>
+    <select id="expenseCategory"></select>
+    <input type="text" id="expenseName" placeholder="Description">
+    <input type="number" id="expenseAmount" placeholder="Amount">
+    <button onclick="addExpense()">Add Expense</button>
+
+    <table>
+      <thead>
+        <tr><th>Category</th><th>Description</th><th>Amount</th><th>Actions</th></tr>
+      </thead>
+      <tbody id="expenseTable"></tbody>
+    </table>
+  </div>
+
+  <!-- Savings -->
+  <div class="section">
+    <h3>Savings Goal</h3>
+    <input type="number" id="monthlySaving" placeholder="Monthly saving">
+    <button onclick="updateSavings()">Save</button>
+  </div>
+
+  <!-- Spending Overview -->
+  <div class="section">
+    <h3>Spending Overview</h3>
+    <div class="chart-box">
+      <canvas id="expensePieChart"></canvas>
+    </div>
+  </div>
+
+  <!-- Insights -->
+  <div class="section">
+    <h3>Monthly Insights</h3>
+    <div id="insightsBox" class="insights"></div>
+  </div>
+
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>

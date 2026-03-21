@@ -15,7 +15,7 @@ A clean, user-friendly finance planning app designed to track income, expenses, 
 
 ## 🔗 Live App
 
-👉 https://yourusername.github.io/your-repo-name/
+👉 https://zintlejita.github.io/your-repo-name/
 
 ## 🛠 Built With
 

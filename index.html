@@ -1,106 +1,554 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Monthly Finance Tracker</title>
-  <link rel="stylesheet" href="style.css">
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<meta charset="UTF-8">
+<title>Finance Planner</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<style>
+body{
+margin:0;
+font-family: "Segoe UI", sans-serif;
+background:#d3d3bb;
+color:#bd8c08;
+}
+
+.app{
+display:grid;
+grid-template-columns:220px 1fr;
+min-height:100vh;
+}
+
+.sidebar{
+background:#f0efe9;
+padding:20px;
+border-right:1px solid #3b2d04;
+}
+
+.nav{
+padding:10px;
+margin-bottom:6px;
+cursor:pointer;
+border-radius:6px;
+}
+
+.nav:hover{
+background:#e7e5df;
+}
+
+.content{
+padding:25px;
+}
+
+.section{display:none;}
+.active{display:block;}
+
+.grid{
+display:grid;
+grid-template-columns:repeat(4,1fr);
+gap:12px;
+}
+
+.card{
+background:#fafaf9;
+padding:12px;
+border-radius:8px;
+border:1px solid #e5e5e5;
+}
+
+.card h4{
+font-size:12px;
+color:#292827;
+margin:0;
+}
+
+.card p{
+font-size:18px;
+font-weight:600;
+margin-top:5px;
+}
+
+input,select{
+width:100%;
+padding:6px;
+margin:4px 0;
+border:1px solid #ddd;
+border-radius:6px;
+}
+
+button{
+padding:6px 10px;
+background:#8b7307;
+color:white;
+border:none;
+border-radius:6px;
+cursor:pointer;
+}
+
+button:hover{
+opacity:0.9;
+}
+
+table{
+width:100%;
+margin-top:10px;
+border-collapse:collapse;
+}
+
+td,th{
+padding:8px;
+border-bottom:1px solid #eee;
+font-size:13px;
+}
+
+.actions button{
+margin-right:5px;
+font-size:11px;
+}
+
+.insights div{
+margin-bottom:6px;
+}
+
+</style>
 </head>
+
 <body>
 
-<div class="container">
-  <h2>Monthly Finance Tracker</h2>
+<div class="app">
 
-  <!-- Month Controls -->
-  <div class="month-bar">
-    <input type="month" id="monthPicker">
-    <button id="loadMonthBtn">Load Month</button>
-    <button id="carryForwardBtn" class="secondary">Carry Forward</button>
-    <button id="submitTodayBtn" class="danger">Submit Today (Lock)</button>
-    <button id="nextMonthBtn">Next Month</button>
-  </div>
+<!-- Sidebar -->
+<div class="sidebar">
+<h3>Planner</h3>
+<div class="nav" onclick="show('dashboard')">Dashboard</div>
+<div class="nav" onclick="show('income')">Income</div>
+<div class="nav" onclick="show('expenses')">Expenses</div>
+<div class="nav" onclick="show('savings')">Savings</div>
+<div class="nav" onclick="show('intentions')">Intentions</div>
+</div>
 
-  <!-- Dashboard -->
-  <h3>Monthly Dashboard</h3>
-  <div class="dashboard-grid">
-    <div class="card">
-      <h4>Total Income</h4>
-      <p id="dashIncome">0</p>
-    </div>
-    <div class="card">
-      <h4>Total Expenses</h4>
-      <p id="dashExpenses">0</p>
-    </div>
-    <div class="card">
-      <h4>Savings</h4>
-      <p id="dashSavings">0</p>
-    </div>
-    <div class="card">
-      <h4>Balance</h4>
-      <p id="dashBalance">0</p>
-    </div>
-  </div>
+<!-- Content -->
+<div class="content">
 
-  <!-- Income -->
-  <div class="section">
-    <h3>Income</h3>
-    <input type="text" id="incomeName" placeholder="Source">
-    <input type="number" id="incomeAmount" placeholder="Amount">
-    <button onclick="addIncome()">Add Income</button>
-    <table>
-      <thead>
-        <tr><th>Source</th><th>Amount</th><th>Actions</th></tr>
-      </thead>
-      <tbody id="incomeTable"></tbody>
-    </table>
-  </div>
+<input type="month" id="monthPicker">
+<button onclick="changeMonth()">Load</button>
 
-  <!-- Categories -->
-  <div class="section">
-    <h3>Expense Categories</h3>
-    <input type="text" id="newCategory" placeholder="Category name">
-    <button onclick="addCategory()">Add Category</button>
-  </div>
+<!-- DASHBOARD -->
+<div id="dashboard" class="section active">
 
-  <!-- Expenses -->
-  <div class="section">
-    <h3>Expenses</h3>
-    <select id="expenseCategory"></select>
-    <input type="text" id="expenseName" placeholder="Description">
-    <input type="number" id="expenseAmount" placeholder="Amount">
-    <button onclick="addExpense()">Add Expense</button>
+<h2>Dashboard</h2>
 
-    <table>
-      <thead>
-        <tr><th>Category</th><th>Description</th><th>Amount</th><th>Actions</th></tr>
-      </thead>
-      <tbody id="expenseTable"></tbody>
-    </table>
-  </div>
+<div class="grid">
+<div class="card"><h4>Income</h4><p id="incomeTotal">0</p></div>
+<div class="card"><h4>Planned</h4><p id="plannedTotal">0</p></div>
+<div class="card"><h4>Actual</h4><p id="actualTotal">0</p></div>
+<div class="card"><h4>Variance</h4><p id="varianceTotal">0</p></div>
 
-  <!-- Savings -->
-  <div class="section">
-    <h3>Savings Goal</h3>
-    <input type="number" id="monthlySaving" placeholder="Monthly saving">
-    <button onclick="updateSavings()">Save</button>
-  </div>
+<div class="card"><h4>Essential</h4><p id="essentialTotal">0</p></div>
+<div class="card"><h4>Non-Essential</h4><p id="nonTotal">0</p></div>
+<div class="card"><h4>Paid</h4><p id="paidTotal">0</p></div>
+<div class="card"><h4>Pending</h4><p id="pendingTotal">0</p></div>
 
-  <!-- Spending Overview -->
-  <div class="section">
-    <h3>Spending Overview</h3>
-    <div class="chart-box">
-      <canvas id="expensePieChart"></canvas>
-    </div>
-  </div>
+<div class="card"><h4>Savings</h4><p id="savingsTotal">0</p></div>
+</div>
 
-  <!-- Insights -->
-  <div class="section">
-    <h3>Monthly Insights</h3>
-    <div id="insightsBox" class="insights"></div>
-  </div>
+<canvas id="chart" style="max-height:260px;margin-top:20px;"></canvas>
+
+<h3>Insights</h3>
+<div id="insightsBox" class="insights"></div>
 
 </div>
 
-<script src="script.js"></script>
+<!-- INCOME -->
+<div id="income" class="section">
+<h2>Income</h2>
+
+<input id="incomeName" placeholder="Source">
+<input id="incomeAmount" type="number" placeholder="Amount">
+<button onclick="addIncome()">Add</button>
+
+<table>
+<tbody id="incomeTable"></tbody>
+</table>
+
+</div>
+
+<!-- EXPENSES -->
+<div id="expenses" class="section">
+
+<h2>Expenses</h2>
+
+<input id="newCategory" placeholder="Add custom category">
+<button onclick="addCategory()">Add Category</button>
+
+<select id="expenseCat"></select>
+
+<select id="expenseType">
+<option value="essential">Essential</option>
+<option value="non">Non-Essential</option>
+</select>
+
+<input id="expenseName" placeholder="Description">
+<input id="expensePlanned" type="number" placeholder="Planned">
+<input id="expenseActual" type="number" placeholder="Actual">
+
+<select id="expenseStatus">
+<option value="paid">Paid</option>
+<option value="pending">Pending</option>
+<option value="moved">Moved</option>
+</select>
+
+<button onclick="addExpense()">Add</button>
+
+<table>
+<tbody id="expenseTable"></tbody>
+</table>
+
+</div>
+
+<!-- SAVINGS -->
+<div id="savings" class="section">
+
+<h2>Savings Goals</h2>
+
+<input id="goalName" placeholder="Goal">
+<input id="goalTarget" type="number" placeholder="Target">
+<input id="goalSaved" type="number" placeholder="Saved">
+
+<button onclick="addGoal()">Add</button>
+
+<table>
+<tbody id="goalTable"></tbody>
+</table>
+
+</div>
+
+<!-- INTENTIONS -->
+<div id="intentions" class="section">
+
+<h2>Intentions</h2>
+
+<input id="intentText" placeholder="What do you want to achieve">
+<select id="intentType">
+<option>weekly</option>
+<option>monthly</option>
+<option>quarterly</option>
+<option>yearly</option>
+</select>
+
+<button onclick="addIntent()">Add</button>
+
+<ul id="intentList"></ul>
+
+</div>
+
+</div>
+</div>
+
+<script>
+
+let data = JSON.parse(localStorage.getItem("financeApp")) || {};
+let month = new Date().toISOString().slice(0,7);
+document.getElementById("monthPicker").value = month;
+
+function initMonth(m){
+if(!data[m]){
+data[m]={
+income:[],
+expenses:[],
+goals:[],
+intentions:[],
+categories:[
+{name:"Rent",type:"essential"},
+{name:"Car",type:"essential"},
+{name:"Food",type:"essential"},
+{name:"Medical Aid",type:"essential"},
+{name:"Insurance",type:"essential"},
+{name:"Education",type:"essential"},
+{name:"Leisure",type:"non"},
+{name:"Travel",type:"non"},
+{name:"Entertainment",type:"non"}
+]
+};
+}
+}
+
+function save(){localStorage.setItem("financeApp",JSON.stringify(data));}
+
+function changeMonth(){
+month = monthPicker.value;
+initMonth(month);
+render();
+save();
+}
+
+function show(id){
+document.querySelectorAll(".section").forEach(s=>s.classList.remove("active"));
+document.getElementById(id).classList.add("active");
+}
+
+// ---------- ADD ----------
+function addIncome(){
+data[month].income.push({name:incomeName.value,amount:+incomeAmount.value});
+save(); render();
+}
+
+function addCategory(){
+if(newCategory.value){
+data[month].categories.push({
+name:newCategory.value,
+type:"non" // default
+});
+
+newCategory.value="";
+save(); 
+render();
+}
+}
+
+function addExpense(){
+data[month].expenses.push({
+cat:expenseCat.value,
+type:expenseType.value,
+name:expenseName.value,
+planned:+expensePlanned.value,
+actual:+expenseActual.value,
+status:expenseStatus.value
+});
+save(); render();
+}
+
+function addGoal(){
+data[month].goals.push({
+name:goalName.value,
+target:+goalTarget.value,
+saved:+goalSaved.value
+});
+save(); render();
+}
+
+function addIntent(){
+data[month].intentions.push({
+text:intentText.value,
+type:intentType.value
+});
+save(); render();
+}
+
+// ---------- EDIT / DELETE ----------
+function deleteItem(type,i){
+data[month][type].splice(i,1);
+save(); render();
+}
+
+function editItem(type,i){
+let item = data[month][type][i];
+let newVal = prompt("Edit value:", item.name || item.text);
+if(newVal){
+if(type==="income") item.name=newVal;
+if(type==="expenses") item.name=newVal;
+if(type==="goals") item.name=newVal;
+if(type==="intentions") item.text=newVal;
+}
+save(); render();
+}
+
+// ---------- RENDER ----------
+function render(){
+
+initMonth(month);
+
+// categories
+expenseCat.innerHTML="";
+data[month].categories.forEach(c=>{
+expenseCat.innerHTML += `
+<option value="${c.name}" data-type="${c.type}">
+${c.name}
+</option>`;
+});
+
+expenseCat.addEventListener("change", function(){
+const selected = this.options[this.selectedIndex];
+const type = selected.getAttribute("data-type");
+
+if(type){
+document.getElementById("expenseType").value = type;
+}
+});
+
+// income
+let income=0;
+incomeTable.innerHTML="";
+data[month].income.forEach((i,idx)=>{
+income+=i.amount;
+incomeTable.innerHTML+=`
+<tr>
+<td>${i.name}</td>
+<td>${i.amount}</td>
+<td class="actions">
+<button onclick="editItem('income',${idx})">Edit</button>
+<button onclick="deleteItem('income',${idx})">Delete</button>
+</td>
+</tr>`;
+});
+
+// expenses
+let planned=0, actual=0, essential=0, non=0, paid=0, pending=0;
+
+expenseTable.innerHTML="";
+data[month].expenses.forEach((e,idx)=>{
+
+planned+=e.planned;
+actual+=e.actual;
+
+if(e.type==="essential") essential+=e.actual;
+else non+=e.actual;
+
+if(e.status==="paid") paid+=e.actual;
+if(e.status==="pending") pending+=e.planned;
+
+expenseTable.innerHTML+=`
+<tr>
+<td>${e.cat}</td>
+<td>${e.name}</td>
+<td>${e.planned}</td>
+<td>${e.actual}</td>
+<td>${e.status}</td>
+<td>
+<button onclick="editItem('expenses',${idx})">Edit</button>
+<button onclick="deleteItem('expenses',${idx})">Delete</button>
+</td>
+</tr>`;
+});
+
+// goals
+let savings=0;
+goalTable.innerHTML="";
+data[month].goals.forEach((g,idx)=>{
+savings+=g.saved;
+goalTable.innerHTML+=`
+<tr>
+<td>${g.name}</td>
+<td>${g.saved}/${g.target}</td>
+<td>
+<button onclick="editItem('goals',${idx})">Edit</button>
+<button onclick="deleteItem('goals',${idx})">Delete</button>
+</td>
+</tr>`;
+});
+
+// intentions
+intentList.innerHTML="";
+data[month].intentions.forEach((i,idx)=>{
+intentList.innerHTML+=`
+<li>
+${i.type}: ${i.text}
+<button onclick="editItem('intentions',${idx})">Edit</button>
+<button onclick="deleteItem('intentions',${idx})">Delete</button>
+</li>`;
+});
+
+// dashboard
+incomeTotal.textContent=income;
+plannedTotal.textContent=planned;
+actualTotal.textContent=actual;
+varianceTotal.textContent=(actual-planned);
+
+essentialTotal.textContent=essential;
+nonTotal.textContent=non;
+paidTotal.textContent=paid;
+pendingTotal.textContent=pending;
+savingsTotal.textContent=savings;
+renderChart(essential, non, savings);
+
+// insights
+generateInsights(income,actual,planned,savings,pending);
+generateComparison();
+
+}
+
+// ---------- INSIGHTS ----------
+function generateInsights(income,actual,planned,savings,pending){
+
+let text=[];
+
+if(actual>income) text.push("Spending exceeded income. Consider small adjustments.");
+else text.push("Spending is within income.");
+
+if(savings>0) text.push("You are building savings steadily.");
+
+if(pending>0) text.push("There are pending payments to prepare for.");
+
+insightsBox.innerHTML=text.map(t=>`<div>• ${t}</div>`).join("");
+
+}
+
+// ---------- COMPARISON ----------
+function generateComparison(){
+
+const months = Object.keys(data).sort();
+let idx = months.indexOf(month);
+
+if(idx<=0) return;
+
+let prev = data[months[idx-1]];
+let curr = data[month];
+
+let prevSpend = prev.expenses.reduce((s,e)=>s+e.actual,0);
+let currSpend = curr.expenses.reduce((s,e)=>s+e.actual,0);
+
+let diff = currSpend - prevSpend;
+
+let msg = diff>0
+? `Spending increased by ${diff} vs last month.`
+: `Spending decreased by ${Math.abs(diff)} vs last month.`;
+
+insightsBox.innerHTML += `<div>• ${msg}</div>`;
+
+}
+
+function renderChart(essential, non, savings){
+
+const canvas = document.getElementById("chart");
+if(!canvas) return;
+
+// destroy old chart safely
+if(window.chartInstance){
+window.chartInstance.destroy();
+}
+
+// ensure numbers
+essential = Number(essential) || 0;
+non = Number(non) || 0;
+savings = Number(savings) || 0;
+
+// avoid blank crash
+if(essential === 0 && non === 0 && savings === 0){
+canvas.getContext("2d").clearRect(0,0,canvas.width,canvas.height);
+return;
+}
+
+// create chart
+window.chartInstance = new Chart(canvas.getContext("2d"), {
+type: "pie",
+data: {
+labels: ["Essential","Non-Essential","Savings"],
+datasets: [{
+data: [essential, non, savings]
+}]
+},
+options: {
+responsive: true,
+plugins: {
+legend: { position: "bottom" }
+}
+}
+});
+
+}
+render();
+
+</script>
+
 </body>
 </html>

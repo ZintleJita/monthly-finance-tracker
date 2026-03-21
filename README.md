@@ -1,38 +1,32 @@
-# Monthly Finance Tracker
+# 💰 Monthly Finance Tracker
 
-A clean and professional monthly finance tracking web application.
+A clean, user-friendly finance planning app designed to track income, expenses, savings, and financial habits.
 
-## Features
+## 🌿 Features
 
-- Income tracking with edit functionality
-- Expense tracking with custom categories
-- Monthly savings goal tracking
-- Spending Overview (Pie Chart using Chart.js)
-- Gentle Monthly Insights system
-- Carry-forward to next month
-- Automatic locking of past months
-- Manual month locking (Submit Today)
-- Clean dashboard UI
-- Local storage persistence
+- Monthly dashboard overview
+- Planned vs Actual spending
+- Essential vs Non-essential tracking
+- Savings goals
+- Monthly insights and guidance
+- Month-to-month comparison
+- Custom expense categories
+- Fully responsive layout
 
-## Tech Stack
+## 🔗 Live App
+
+👉 https://yourusername.github.io/your-repo-name/
+
+## 🛠 Built With
 
 - HTML
 - CSS
 - JavaScript
 - Chart.js
 
-## Live Demo
+## 🌱 Purpose
 
-[Click here to view the app](https://zintlejita.github.io/monthly-finance-tracker/)
-
-## Future Improvements
-
-- Financial health score
-- Savings progress visualization
-- Excel export with multiple sheets
-- Advanced analytics and month-to-month comparisons
+This project is designed as a personal finance tool and a portfolio project, with future plans to evolve into a full financial application.
 
 ---
 
-Designed as a portfolio-level personal finance management system.

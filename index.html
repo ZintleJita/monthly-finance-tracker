@@ -2,553 +2,1051 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Finance Planner</title>
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
-body{
-margin:0;
-font-family: "Segoe UI", sans-serif;
-background:#d3d3bb;
-color:#bd8c08;
-}
-
-.app{
-display:grid;
-grid-template-columns:220px 1fr;
-min-height:100vh;
-}
-
-.sidebar{
-background:#f0efe9;
-padding:20px;
-border-right:1px solid #3b2d04;
-}
-
-.nav{
-padding:10px;
-margin-bottom:6px;
-cursor:pointer;
-border-radius:6px;
-}
-
-.nav:hover{
-background:#e7e5df;
-}
-
-.content{
-padding:25px;
-}
-
-.section{display:none;}
-.active{display:block;}
-
-.grid{
-display:grid;
-grid-template-columns:repeat(4,1fr);
-gap:12px;
-}
-
-.card{
-background:#fafaf9;
-padding:12px;
-border-radius:8px;
-border:1px solid #e5e5e5;
-}
-
-.card h4{
-font-size:12px;
-color:#292827;
-margin:0;
-}
-
-.card p{
-font-size:18px;
-font-weight:600;
-margin-top:5px;
-}
-
-input,select{
-width:100%;
-padding:6px;
-margin:4px 0;
-border:1px solid #ddd;
-border-radius:6px;
-}
-
-button{
-padding:6px 10px;
-background:#8b7307;
-color:white;
-border:none;
-border-radius:6px;
-cursor:pointer;
-}
-
-button:hover{
-opacity:0.9;
-}
-
-table{
-width:100%;
-margin-top:10px;
-border-collapse:collapse;
-}
-
-td,th{
-padding:8px;
-border-bottom:1px solid #eee;
-font-size:13px;
-}
-
-.actions button{
-margin-right:5px;
-font-size:11px;
-}
-
-.insights div{
-margin-bottom:6px;
-}
-
+  :root {
+    --bg: #0f0f0f;
+    --surface: #1a1a1a;
+    --surface2: #222222;
+    --border: #2e2e2e;
+    --accent: #c8f04a;
+    --accent2: #4af0b4;
+    --accent3: #f04a7a;
+    --text: #f0ede8;
+    --muted: #888;
+    --essential: #4af0b4;
+    --nonessential: #f0a84a;
+    --saving: #4a9ff0;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    display: flex;
+    overflow: hidden;
+  }
+ 
+  /* SIDEBAR */
+  .sidebar {
+    width: 220px;
+    min-width: 220px;
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    padding: 28px 0;
+    height: 100vh;
+    overflow-y: auto;
+  }
+  .logo {
+    font-family: 'DM Serif Display', serif;
+    font-size: 1.3rem;
+    padding: 0 22px 28px;
+    letter-spacing: -0.5px;
+    color: var(--accent);
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 16px;
+  }
+  .logo span { color: var(--text); font-style: italic; }
+  .nav-section { padding: 0 12px; margin-bottom: 8px; }
+  .nav-label { font-size: 0.62rem; text-transform: uppercase; letter-spacing: 2px; color: var(--muted); padding: 0 10px; margin-bottom: 6px; }
+  .nav-item {
+    display: flex; align-items: center; gap: 10px;
+    padding: 9px 10px; border-radius: 8px; cursor: pointer;
+    font-size: 0.85rem; font-weight: 500; color: var(--muted);
+    transition: all 0.15s; border: 1px solid transparent;
+  }
+  .nav-item:hover { background: var(--surface2); color: var(--text); }
+  .nav-item.active { background: #1e2a0e; color: var(--accent); border-color: #3a5010; }
+  .nav-icon { font-size: 1rem; width: 20px; text-align: center; }
+  .month-selector {
+    margin: auto 12px 0;
+    padding: 10px;
+    background: var(--surface2);
+    border-radius: 10px;
+    border: 1px solid var(--border);
+  }
+  .month-selector label { font-size: 0.7rem; color: var(--muted); display: block; margin-bottom: 4px; }
+  .month-selector select {
+    background: transparent; border: none; color: var(--text);
+    font-family: 'DM Sans', sans-serif; font-size: 0.85rem;
+    width: 100%; cursor: pointer; outline: none;
+  }
+  .month-selector select option { background: #222; }
+ 
+  /* MAIN */
+  .main { flex: 1; overflow-y: auto; padding: 32px; display: flex; flex-direction: column; gap: 24px; }
+  .page { display: none; }
+  .page.active { display: contents; }
+ 
+  /* HEADER */
+  .page-header { display: flex; align-items: flex-end; justify-content: space-between; }
+  .page-title { font-family: 'DM Serif Display', serif; font-size: 2rem; letter-spacing: -1px; }
+  .page-subtitle { color: var(--muted); font-size: 0.85rem; margin-top: 2px; }
+  .btn {
+    padding: 9px 18px; border-radius: 8px; border: none;
+    font-family: 'DM Sans', sans-serif; font-size: 0.82rem; font-weight: 600;
+    cursor: pointer; transition: all 0.15s; display: flex; align-items: center; gap: 6px;
+  }
+  .btn-primary { background: var(--accent); color: #0f0f0f; }
+  .btn-primary:hover { background: #d4f55a; }
+  .btn-ghost { background: var(--surface2); color: var(--text); border: 1px solid var(--border); }
+  .btn-ghost:hover { background: var(--border); }
+  .btn-danger { background: #2a1010; color: var(--accent3); border: 1px solid #4a1a1a; }
+  .btn-danger:hover { background: #3a1515; }
+ 
+  /* STAT CARDS */
+  .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 14px; }
+  .stat-card {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 12px;
+    padding: 18px 20px;
+  }
+  .stat-card.accent { background: #1a2200; border-color: #3a5010; }
+  .stat-label { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 1.5px; color: var(--muted); margin-bottom: 6px; }
+  .stat-value { font-family: 'DM Serif Display', serif; font-size: 1.6rem; letter-spacing: -1px; }
+  .stat-value.green { color: var(--accent); }
+  .stat-value.teal { color: var(--accent2); }
+  .stat-value.red { color: var(--accent3); }
+  .stat-value.blue { color: var(--saving); }
+  .stat-badge { font-size: 0.72rem; color: var(--muted); margin-top: 4px; }
+ 
+  /* TABLE */
+  .card {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 14px; overflow: hidden;
+  }
+  .card-header {
+    padding: 16px 20px; border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .card-title { font-weight: 600; font-size: 0.9rem; }
+  .card-body { padding: 0; }
+  table { width: 100%; border-collapse: collapse; }
+  thead th {
+    text-align: left; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1.5px;
+    color: var(--muted); padding: 12px 20px; border-bottom: 1px solid var(--border);
+    background: var(--surface2);
+  }
+  tbody tr { border-bottom: 1px solid var(--border); transition: background 0.1s; }
+  tbody tr:last-child { border-bottom: none; }
+  tbody tr:hover { background: var(--surface2); }
+  tbody td { padding: 12px 20px; font-size: 0.85rem; }
+  .tag {
+    display: inline-block; padding: 2px 8px; border-radius: 20px; font-size: 0.72rem; font-weight: 600;
+  }
+  .tag-essential { background: #0d2a1e; color: var(--essential); border: 1px solid #1a4a35; }
+  .tag-non { background: #2a1d0d; color: var(--nonessential); border: 1px solid #4a3510; }
+  .tag-paid { background: #1a2200; color: var(--accent); border: 1px solid #3a5010; }
+  .tag-pending { background: #2a1010; color: var(--accent3); border: 1px solid #4a1a1a; }
+  .tag-moved { background: #0d1a2a; color: var(--saving); border: 1px solid #1a3a5a; }
+ 
+  /* PROGRESS BAR */
+  .progress-wrap { background: var(--surface2); border-radius: 4px; height: 6px; overflow: hidden; }
+  .progress-bar { height: 100%; border-radius: 4px; transition: width 0.5s; }
+ 
+  /* FORM MODAL */
+  .overlay {
+    display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7);
+    z-index: 100; align-items: center; justify-content: center;
+  }
+  .overlay.open { display: flex; }
+  .modal {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 16px;
+    padding: 28px; width: 420px; max-width: 95vw;
+  }
+  .modal h3 { font-family: 'DM Serif Display', serif; font-size: 1.3rem; margin-bottom: 20px; }
+  .form-row { margin-bottom: 14px; }
+  .form-row label { display: block; font-size: 0.78rem; color: var(--muted); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 1px; }
+  .form-row input, .form-row select, .form-row textarea {
+    width: 100%; background: var(--surface2); border: 1px solid var(--border);
+    border-radius: 8px; padding: 10px 12px; color: var(--text);
+    font-family: 'DM Sans', sans-serif; font-size: 0.85rem; outline: none;
+    transition: border 0.15s;
+  }
+  .form-row input:focus, .form-row select:focus, .form-row textarea:focus { border-color: var(--accent); }
+  .form-row textarea { resize: vertical; min-height: 70px; }
+  .form-row select option { background: #222; }
+  .form-actions { display: flex; gap: 10px; margin-top: 20px; justify-content: flex-end; }
+ 
+  /* CHART */
+  .chart-container { padding: 20px; }
+  canvas { max-width: 100%; }
+ 
+  /* DONUT */
+  .donut-wrap { display: flex; align-items: center; gap: 24px; padding: 20px; }
+  .legend-item { display: flex; align-items: center; gap: 8px; font-size: 0.82rem; margin-bottom: 8px; }
+  .legend-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+ 
+  /* SAVINGS GOAL */
+  .goal-card {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 18px 20px;
+  }
+  .goal-name { font-weight: 600; font-size: 0.9rem; margin-bottom: 4px; }
+  .goal-meta { font-size: 0.78rem; color: var(--muted); margin-bottom: 12px; }
+  .goal-amounts { display: flex; justify-content: space-between; font-size: 0.8rem; margin-bottom: 6px; }
+  .goals-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 14px; }
+ 
+  /* INTENTIONS */
+  .intention-card {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 16px 20px;
+    display: flex; align-items: flex-start; gap: 14px;
+  }
+  .intention-check {
+    width: 20px; height: 20px; border-radius: 50%; border: 2px solid var(--border);
+    flex-shrink: 0; cursor: pointer; display: flex; align-items: center; justify-content: center;
+    margin-top: 1px; transition: all 0.15s;
+  }
+  .intention-check.done { background: var(--accent); border-color: var(--accent); }
+  .intention-text { font-size: 0.85rem; }
+  .intention-text.done { text-decoration: line-through; color: var(--muted); }
+  .intention-period { font-size: 0.7rem; color: var(--muted); margin-top: 3px; }
+  .intentions-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 12px; }
+  .tab-pills { display: flex; gap: 8px; flex-wrap: wrap; }
+  .tab-pill {
+    padding: 6px 14px; border-radius: 20px; font-size: 0.78rem; cursor: pointer;
+    background: var(--surface2); border: 1px solid var(--border); color: var(--muted); transition: all 0.15s;
+  }
+  .tab-pill.active { background: #1e2a0e; color: var(--accent); border-color: #3a5010; }
+ 
+  /* REPORT */
+  .report-section { margin-bottom: 24px; }
+  .report-section h4 { font-size: 0.78rem; text-transform: uppercase; letter-spacing: 1.5px; color: var(--muted); margin-bottom: 12px; }
+  .report-row { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--border); font-size: 0.85rem; }
+  .report-row:last-child { border-bottom: none; }
+  .report-total { display: flex; justify-content: space-between; padding: 12px 0; font-weight: 700; font-size: 0.95rem; }
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  @media (max-width: 700px) { .two-col { grid-template-columns: 1fr; } }
+ 
+  /* SCROLLBAR */
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+ 
+  /* ACCOUNT CARDS */
+  .accounts-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 14px; }
+  .account-card {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 20px;
+    position: relative; overflow: hidden;
+  }
+  .account-card::before {
+    content: ''; position: absolute; top: -20px; right: -20px;
+    width: 80px; height: 80px; border-radius: 50%; opacity: 0.08;
+  }
+  .account-card.bank::before { background: var(--accent); }
+  .account-card.card::before { background: var(--accent3); }
+  .account-card.invest::before { background: var(--saving); }
+  .account-type { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1.5px; color: var(--muted); margin-bottom: 10px; }
+  .account-name { font-weight: 600; font-size: 0.9rem; margin-bottom: 6px; }
+  .account-number { font-size: 0.75rem; color: var(--muted); font-family: monospace; margin-bottom: 14px; }
+  .account-balance { font-family: 'DM Serif Display', serif; font-size: 1.5rem; }
+ 
+  .empty-state { text-align: center; padding: 40px 20px; color: var(--muted); }
+  .empty-state .emoji { font-size: 2rem; margin-bottom: 10px; }
+  .empty-state p { font-size: 0.85rem; }
+ 
+  .actions-row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+ 
+  .delete-btn {
+    background: none; border: none; color: var(--muted); cursor: pointer; padding: 4px 6px;
+    border-radius: 4px; font-size: 0.9rem; transition: all 0.15s;
+  }
+  .delete-btn:hover { color: var(--accent3); background: #2a1010; }
 </style>
 </head>
-
 <body>
-
-<div class="app">
-
-<!-- Sidebar -->
-<div class="sidebar">
-<h3>Planner</h3>
-<div class="nav" onclick="show('dashboard')">Dashboard</div>
-<div class="nav" onclick="show('income')">Income</div>
-<div class="nav" onclick="show('expenses')">Expenses</div>
-<div class="nav" onclick="show('savings')">Savings</div>
-<div class="nav" onclick="show('intentions')">Intentions</div>
+ 
+<!-- SIDEBAR -->
+<nav class="sidebar">
+  <div class="logo">Finance<span>Planner</span></div>
+  <div class="nav-section">
+    <div class="nav-label">Overview</div>
+    <div class="nav-item active" onclick="navigate('dashboard')"><span class="nav-icon">⬛</span> Dashboard</div>
+    <div class="nav-item" onclick="navigate('accounts')"><span class="nav-icon">🏦</span> Accounts</div>
+    <div class="nav-item" onclick="navigate('report')"><span class="nav-icon">📋</span> Monthly Report</div>
+    <div class="nav-item" onclick="navigate('graphs')"><span class="nav-icon">📊</span> Graphs</div>
+  </div>
+  <div class="nav-section">
+    <div class="nav-label">Manage</div>
+    <div class="nav-item" onclick="navigate('income')"><span class="nav-icon">💰</span> Income</div>
+    <div class="nav-item" onclick="navigate('expenses')"><span class="nav-icon">💳</span> Expenses</div>
+    <div class="nav-item" onclick="navigate('savings')"><span class="nav-icon">🎯</span> Savings Goals</div>
+    <div class="nav-item" onclick="navigate('intentions')"><span class="nav-icon">💡</span> Intentions</div>
+  </div>
+  <div class="month-selector">
+    <label>Period</label>
+    <select id="monthSelect" onchange="changeMonth()">
+      <option value="2026-04">April 2026</option>
+      <option value="2026-05">May 2026</option>
+      <option value="2026-03">March 2026</option>
+      <option value="2026-02">February 2026</option>
+    </select>
+  </div>
+</nav>
+ 
+<!-- MAIN -->
+<main class="main">
+ 
+  <!-- DASHBOARD -->
+  <div id="page-dashboard" class="page active">
+    <div class="page-header">
+      <div><div class="page-title">Dashboard</div><div class="page-subtitle" id="dashMonth">April 2026</div></div>
+      <div class="actions-row">
+        <button class="btn btn-ghost" onclick="exportData()">⬇ Export</button>
+        <button class="btn btn-primary" onclick="openModal('income-modal')">+ Add Income</button>
+      </div>
+    </div>
+ 
+    <div class="stats-grid" id="dashStats"></div>
+ 
+    <div class="two-col">
+      <div class="card">
+        <div class="card-header"><span class="card-title">Spending Breakdown</span></div>
+        <div class="chart-container" style="height:220px;display:flex;align-items:center;justify-content:center;">
+          <canvas id="donutChart" width="180" height="180"></canvas>
+          <div style="margin-left:20px;" id="donutLegend"></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-header"><span class="card-title">Budget Health</span></div>
+        <div class="card-body" style="padding:16px 20px;" id="budgetHealth"></div>
+      </div>
+    </div>
+ 
+    <div class="card">
+      <div class="card-header"><span class="card-title">Recent Expenses</span></div>
+      <div class="card-body" id="recentExpenses"></div>
+    </div>
+  </div>
+ 
+  <!-- ACCOUNTS -->
+  <div id="page-accounts" class="page">
+    <div class="page-header">
+      <div><div class="page-title">Accounts</div><div class="page-subtitle">Banks, cards & investments</div></div>
+      <button class="btn btn-primary" onclick="openModal('account-modal')">+ Add Account</button>
+    </div>
+    <div class="accounts-grid" id="accountsGrid"></div>
+  </div>
+ 
+  <!-- INCOME -->
+  <div id="page-income" class="page">
+    <div class="page-header">
+      <div><div class="page-title">Income</div><div class="page-subtitle">All income sources</div></div>
+      <button class="btn btn-primary" onclick="openModal('income-modal')">+ Add Income</button>
+    </div>
+    <div class="card"><div class="card-body" id="incomeTable"></div></div>
+  </div>
+ 
+  <!-- EXPENSES -->
+  <div id="page-expenses" class="page">
+    <div class="page-header">
+      <div><div class="page-title">Expenses</div><div class="page-subtitle">Essentials & non-essentials</div></div>
+      <button class="btn btn-primary" onclick="openModal('expense-modal')">+ Add Expense</button>
+    </div>
+    <div class="stats-grid" id="expenseStats" style="grid-template-columns:repeat(4,1fr)"></div>
+    <div class="card"><div class="card-body" id="expenseTable"></div></div>
+  </div>
+ 
+  <!-- SAVINGS -->
+  <div id="page-savings" class="page">
+    <div class="page-header">
+      <div><div class="page-title">Savings Goals</div><div class="page-subtitle">Track your targets</div></div>
+      <button class="btn btn-primary" onclick="openModal('savings-modal')">+ New Goal</button>
+    </div>
+    <div class="goals-grid" id="goalsGrid"></div>
+  </div>
+ 
+  <!-- INTENTIONS -->
+  <div id="page-intentions" class="page">
+    <div class="page-header">
+      <div><div class="page-title">Intentions</div><div class="page-subtitle">What you want to achieve</div></div>
+      <button class="btn btn-primary" onclick="openModal('intention-modal')">+ Add Intention</button>
+    </div>
+    <div class="tab-pills" id="intentionTabs">
+      <div class="tab-pill active" onclick="filterIntentions('all',this)">All</div>
+      <div class="tab-pill" onclick="filterIntentions('weekly',this)">Weekly</div>
+      <div class="tab-pill" onclick="filterIntentions('monthly',this)">Monthly</div>
+      <div class="tab-pill" onclick="filterIntentions('quarterly',this)">Quarterly</div>
+      <div class="tab-pill" onclick="filterIntentions('yearly',this)">Yearly</div>
+    </div>
+    <div class="intentions-grid" id="intentionsGrid"></div>
+  </div>
+ 
+  <!-- REPORT -->
+  <div id="page-report" class="page">
+    <div class="page-header">
+      <div><div class="page-title">Monthly Report</div><div class="page-subtitle" id="reportMonth">April 2026</div></div>
+      <button class="btn btn-ghost" onclick="window.print()">🖨 Print</button>
+    </div>
+    <div class="two-col">
+      <div class="card" style="padding:24px;" id="reportCard"></div>
+      <div>
+        <div class="card" style="padding:20px;margin-bottom:16px;">
+          <div class="card-title" style="margin-bottom:16px;">Spending vs Budget</div>
+          <canvas id="barChart" height="200"></canvas>
+        </div>
+        <div class="card" style="padding:20px;" id="reportSummaryBox"></div>
+      </div>
+    </div>
+  </div>
+ 
+  <!-- GRAPHS -->
+  <div id="page-graphs" class="page">
+    <div class="page-header">
+      <div><div class="page-title">Graphs</div><div class="page-subtitle">Visual spending insights</div></div>
+    </div>
+    <div class="two-col">
+      <div class="card">
+        <div class="card-header"><span class="card-title">Essential vs Non-Essential</span></div>
+        <div class="chart-container"><canvas id="pieChart" height="220"></canvas></div>
+      </div>
+      <div class="card">
+        <div class="card-header"><span class="card-title">Income vs Expenses</span></div>
+        <div class="chart-container"><canvas id="lineChart" height="220"></canvas></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-header"><span class="card-title">Expense Categories</span></div>
+      <div class="chart-container"><canvas id="categoryBar" height="200"></canvas></div>
+    </div>
+  </div>
+ 
+</main>
+ 
+<!-- MODALS -->
+<div class="overlay" id="income-modal">
+  <div class="modal">
+    <h3>Add Income</h3>
+    <div class="form-row"><label>Source</label><input id="inc-source" placeholder="e.g. Salary, Freelance"/></div>
+    <div class="form-row"><label>Planned Amount (R)</label><input id="inc-planned" type="number" placeholder="0.00"/></div>
+    <div class="form-row"><label>Actual Amount (R)</label><input id="inc-actual" type="number" placeholder="0.00"/></div>
+    <div class="form-row"><label>Date</label><input id="inc-date" type="date"/></div>
+    <div class="form-actions">
+      <button class="btn btn-ghost" onclick="closeModal('income-modal')">Cancel</button>
+      <button class="btn btn-primary" onclick="addIncome()">Add Income</button>
+    </div>
+  </div>
 </div>
-
-<!-- Content -->
-<div class="content">
-
-<input type="month" id="monthPicker">
-<button onclick="changeMonth()">Load</button>
-
-<!-- DASHBOARD -->
-<div id="dashboard" class="section active">
-
-<h2>Dashboard</h2>
-
-<div class="grid">
-<div class="card"><h4>Income</h4><p id="incomeTotal">0</p></div>
-<div class="card"><h4>Planned</h4><p id="plannedTotal">0</p></div>
-<div class="card"><h4>Actual</h4><p id="actualTotal">0</p></div>
-<div class="card"><h4>Variance</h4><p id="varianceTotal">0</p></div>
-
-<div class="card"><h4>Essential</h4><p id="essentialTotal">0</p></div>
-<div class="card"><h4>Non-Essential</h4><p id="nonTotal">0</p></div>
-<div class="card"><h4>Paid</h4><p id="paidTotal">0</p></div>
-<div class="card"><h4>Pending</h4><p id="pendingTotal">0</p></div>
-
-<div class="card"><h4>Savings</h4><p id="savingsTotal">0</p></div>
+ 
+<div class="overlay" id="expense-modal">
+  <div class="modal">
+    <h3>Add Expense</h3>
+    <div class="form-row"><label>Description</label><input id="exp-desc" placeholder="e.g. Groceries"/></div>
+    <div class="form-row"><label>Category</label>
+      <select id="exp-cat">
+        <optgroup label="Essential">
+          <option value="Rent">Rent / Bond</option>
+          <option value="Car">Car / Transport</option>
+          <option value="Food">Food / Groceries</option>
+          <option value="Medical Aid">Medical Aid</option>
+          <option value="Insurance">Insurance</option>
+          <option value="Education">Education</option>
+          <option value="Utilities">Utilities</option>
+        </optgroup>
+        <optgroup label="Non-Essential">
+          <option value="Entertainment">Entertainment</option>
+          <option value="Travel">Leisure Travel</option>
+          <option value="Dining Out">Dining Out</option>
+          <option value="Subscriptions">Subscriptions</option>
+          <option value="Clothing">Clothing</option>
+          <option value="Other">Other</option>
+        </optgroup>
+      </select>
+    </div>
+    <div class="form-row"><label>Planned Amount (R)</label><input id="exp-planned" type="number" placeholder="0.00"/></div>
+    <div class="form-row"><label>Actual Amount (R)</label><input id="exp-actual" type="number" placeholder="0.00"/></div>
+    <div class="form-row"><label>Status</label>
+      <select id="exp-status">
+        <option value="Pending">Pending</option>
+        <option value="Paid">Paid</option>
+        <option value="Moved">Moved</option>
+      </select>
+    </div>
+    <div class="form-row"><label>Date</label><input id="exp-date" type="date"/></div>
+    <div class="form-actions">
+      <button class="btn btn-ghost" onclick="closeModal('expense-modal')">Cancel</button>
+      <button class="btn btn-primary" onclick="addExpense()">Add Expense</button>
+    </div>
+  </div>
 </div>
-
-<canvas id="chart" style="max-height:260px;margin-top:20px;"></canvas>
-
-<h3>Insights</h3>
-<div id="insightsBox" class="insights"></div>
-
+ 
+<div class="overlay" id="savings-modal">
+  <div class="modal">
+    <h3>New Savings Goal</h3>
+    <div class="form-row"><label>Goal Name</label><input id="sav-name" placeholder="e.g. Emergency Fund"/></div>
+    <div class="form-row"><label>Target Amount (R)</label><input id="sav-target" type="number" placeholder="0.00"/></div>
+    <div class="form-row"><label>Current Saved (R)</label><input id="sav-current" type="number" placeholder="0.00"/></div>
+    <div class="form-row"><label>Monthly Contribution (R)</label><input id="sav-monthly" type="number" placeholder="0.00"/></div>
+    <div class="form-row"><label>Target Date</label><input id="sav-date" type="date"/></div>
+    <div class="form-actions">
+      <button class="btn btn-ghost" onclick="closeModal('savings-modal')">Cancel</button>
+      <button class="btn btn-primary" onclick="addGoal()">Create Goal</button>
+    </div>
+  </div>
 </div>
-
-<!-- INCOME -->
-<div id="income" class="section">
-<h2>Income</h2>
-
-<input id="incomeName" placeholder="Source">
-<input id="incomeAmount" type="number" placeholder="Amount">
-<button onclick="addIncome()">Add</button>
-
-<table>
-<tbody id="incomeTable"></tbody>
-</table>
-
+ 
+<div class="overlay" id="intention-modal">
+  <div class="modal">
+    <h3>Add Intention</h3>
+    <div class="form-row"><label>What do you want to achieve?</label><textarea id="int-text" placeholder="e.g. Save R2000 this month..."></textarea></div>
+    <div class="form-row"><label>Period</label>
+      <select id="int-period">
+        <option value="weekly">Weekly</option>
+        <option value="monthly">Monthly</option>
+        <option value="quarterly">Quarterly</option>
+        <option value="yearly">Yearly</option>
+      </select>
+    </div>
+    <div class="form-actions">
+      <button class="btn btn-ghost" onclick="closeModal('intention-modal')">Cancel</button>
+      <button class="btn btn-primary" onclick="addIntention()">Add Intention</button>
+    </div>
+  </div>
 </div>
-
-<!-- EXPENSES -->
-<div id="expenses" class="section">
-
-<h2>Expenses</h2>
-
-<input id="newCategory" placeholder="Add custom category">
-<button onclick="addCategory()">Add Category</button>
-
-<select id="expenseCat"></select>
-
-<select id="expenseType">
-<option value="essential">Essential</option>
-<option value="non">Non-Essential</option>
-</select>
-
-<input id="expenseName" placeholder="Description">
-<input id="expensePlanned" type="number" placeholder="Planned">
-<input id="expenseActual" type="number" placeholder="Actual">
-
-<select id="expenseStatus">
-<option value="paid">Paid</option>
-<option value="pending">Pending</option>
-<option value="moved">Moved</option>
-</select>
-
-<button onclick="addExpense()">Add</button>
-
-<table>
-<tbody id="expenseTable"></tbody>
-</table>
-
+ 
+<div class="overlay" id="account-modal">
+  <div class="modal">
+    <h3>Add Account</h3>
+    <div class="form-row"><label>Account Name</label><input id="acc-name" placeholder="e.g. FNB Cheque"/></div>
+    <div class="form-row"><label>Type</label>
+      <select id="acc-type">
+        <option value="bank">Bank Account</option>
+        <option value="card">Credit Card</option>
+        <option value="invest">Investment</option>
+        <option value="savings">Savings Account</option>
+      </select>
+    </div>
+    <div class="form-row"><label>Account Number (last 4 digits)</label><input id="acc-number" placeholder="XXXX"/></div>
+    <div class="form-row"><label>Balance (R)</label><input id="acc-balance" type="number" placeholder="0.00"/></div>
+    <div class="form-actions">
+      <button class="btn btn-ghost" onclick="closeModal('account-modal')">Cancel</button>
+      <button class="btn btn-primary" onclick="addAccount()">Add Account</button>
+    </div>
+  </div>
 </div>
-
-<!-- SAVINGS -->
-<div id="savings" class="section">
-
-<h2>Savings Goals</h2>
-
-<input id="goalName" placeholder="Goal">
-<input id="goalTarget" type="number" placeholder="Target">
-<input id="goalSaved" type="number" placeholder="Saved">
-
-<button onclick="addGoal()">Add</button>
-
-<table>
-<tbody id="goalTable"></tbody>
-</table>
-
-</div>
-
-<!-- INTENTIONS -->
-<div id="intentions" class="section">
-
-<h2>Intentions</h2>
-
-<input id="intentText" placeholder="What do you want to achieve">
-<select id="intentType">
-<option>weekly</option>
-<option>monthly</option>
-<option>quarterly</option>
-<option>yearly</option>
-</select>
-
-<button onclick="addIntent()">Add</button>
-
-<ul id="intentList"></ul>
-
-</div>
-
-</div>
-</div>
-
+ 
 <script>
-
-let data = JSON.parse(localStorage.getItem("financeApp")) || {};
-let month = new Date().toISOString().slice(0,7);
-document.getElementById("monthPicker").value = month;
-
-function initMonth(m){
-if(!data[m]){
-data[m]={
-income:[],
-expenses:[],
-goals:[],
-intentions:[],
-categories:[
-{name:"Rent",type:"essential"},
-{name:"Car",type:"essential"},
-{name:"Food",type:"essential"},
-{name:"Medical Aid",type:"essential"},
-{name:"Insurance",type:"essential"},
-{name:"Education",type:"essential"},
-{name:"Leisure",type:"non"},
-{name:"Travel",type:"non"},
-{name:"Entertainment",type:"non"}
-]
-};
+// ── DATA STORE ──
+const ESSENTIAL_CATS = ['Rent','Car','Food','Medical Aid','Insurance','Education','Utilities'];
+ 
+function getStore() {
+  return JSON.parse(localStorage.getItem('fp_data') || JSON.stringify({
+    income: [], expenses: [], goals: [], intentions: [], accounts: []
+  }));
 }
+function saveStore(d) { localStorage.setItem('fp_data', JSON.stringify(d)); }
+ 
+// ── NAVIGATION ──
+let currentPage = 'dashboard';
+function navigate(page) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('page-' + page).classList.add('active');
+  document.querySelectorAll('.nav-item').forEach(n => {
+    if (n.textContent.toLowerCase().includes(page.slice(0,4))) n.classList.add('active');
+  });
+  currentPage = page;
+  render();
 }
-
-function save(){localStorage.setItem("financeApp",JSON.stringify(data));}
-
-function changeMonth(){
-month = monthPicker.value;
-initMonth(month);
+ 
+function changeMonth() { render(); }
+ 
+function getMonth() { return document.getElementById('monthSelect').value; }
+ 
+// ── RENDER DISPATCH ──
+function render() {
+  const page = currentPage;
+  if (page === 'dashboard') renderDashboard();
+  else if (page === 'income') renderIncome();
+  else if (page === 'expenses') renderExpenses();
+  else if (page === 'savings') renderSavings();
+  else if (page === 'intentions') renderIntentions();
+  else if (page === 'report') renderReport();
+  else if (page === 'graphs') renderGraphs();
+  else if (page === 'accounts') renderAccounts();
+}
+ 
+function fmt(n) { return 'R ' + Number(n||0).toLocaleString('en-ZA',{minimumFractionDigits:2,maximumFractionDigits:2}); }
+ 
+// ── DASHBOARD ──
+function renderDashboard() {
+  const d = getStore();
+  const month = getMonth();
+  const inc = d.income.filter(i => i.date && i.date.startsWith(month));
+  const exp = d.expenses.filter(e => e.date && e.date.startsWith(month));
+ 
+  const totalInc = inc.reduce((a,i) => a + (+i.actual||+i.planned||0), 0);
+  const totalPlanned = exp.reduce((a,e) => a + (+e.planned||0), 0);
+  const totalActual = exp.reduce((a,e) => a + (+e.actual||0), 0);
+  const essential = exp.filter(e => ESSENTIAL_CATS.includes(e.category)).reduce((a,e)=>a+(+e.actual||0),0);
+  const nonEssential = exp.filter(e => !ESSENTIAL_CATS.includes(e.category)).reduce((a,e)=>a+(+e.actual||0),0);
+  const paid = exp.filter(e=>e.status==='Paid').reduce((a,e)=>a+(+e.actual||0),0);
+  const pending = exp.filter(e=>e.status==='Pending').reduce((a,e)=>a+(+e.planned||0),0);
+  const savings = d.goals.reduce((a,g) => a+(+g.current||0), 0);
+  const variance = totalInc - totalActual;
+ 
+  const sel = document.getElementById('monthSelect');
+  document.getElementById('dashMonth').textContent = sel.options[sel.selectedIndex].text;
+ 
+  document.getElementById('dashStats').innerHTML = `
+    <div class="stat-card accent"><div class="stat-label">Total Income</div><div class="stat-value green">${fmt(totalInc)}</div></div>
+    <div class="stat-card"><div class="stat-label">Planned Expenses</div><div class="stat-value">${fmt(totalPlanned)}</div></div>
+    <div class="stat-card"><div class="stat-label">Actual Expenses</div><div class="stat-value red">${fmt(totalActual)}</div></div>
+    <div class="stat-card"><div class="stat-label">Variance</div><div class="stat-value ${variance>=0?'green':'red'}">${fmt(variance)}</div></div>
+    <div class="stat-card"><div class="stat-label">Essentials</div><div class="stat-value teal">${fmt(essential)}</div></div>
+    <div class="stat-card"><div class="stat-label">Non-Essentials</div><div class="stat-value" style="color:var(--nonessential)">${fmt(nonEssential)}</div></div>
+    <div class="stat-card"><div class="stat-label">Paid</div><div class="stat-value green">${fmt(paid)}</div></div>
+    <div class="stat-card"><div class="stat-label">Pending</div><div class="stat-value red">${fmt(pending)}</div></div>
+    <div class="stat-card"><div class="stat-label">Total Savings</div><div class="stat-value blue">${fmt(savings)}</div></div>
+  `;
+ 
+  // Donut chart
+  const donutData = [
+    {label:'Essential', value:essential, color:'#4af0b4'},
+    {label:'Non-Essential', value:nonEssential, color:'#f0a84a'},
+    {label:'Savings', value:savings, color:'#4a9ff0'},
+  ].filter(d=>d.value>0);
+  drawDonut('donutChart', donutData);
+  document.getElementById('donutLegend').innerHTML = donutData.map(d=>`
+    <div class="legend-item"><div class="legend-dot" style="background:${d.color}"></div><span>${d.label}: ${fmt(d.value)}</span></div>
+  `).join('');
+ 
+  // Budget health
+  const cats = [...new Set(exp.map(e=>e.category))];
+  document.getElementById('budgetHealth').innerHTML = cats.length ? cats.map(cat=>{
+    const catExp = exp.filter(e=>e.category===cat);
+    const p = catExp.reduce((a,e)=>a+(+e.planned||0),0);
+    const a = catExp.reduce((a,e)=>a+(+e.actual||0),0);
+    const pct = p>0?Math.min(100,Math.round(a/p*100)):0;
+    const color = pct>100?'#f04a7a':pct>80?'#f0a84a':'#4af0b4';
+    return `<div style="margin-bottom:12px">
+      <div style="display:flex;justify-content:space-between;font-size:0.8rem;margin-bottom:4px"><span>${cat}</span><span style="color:${color}">${pct}%</span></div>
+      <div class="progress-wrap"><div class="progress-bar" style="width:${pct}%;background:${color}"></div></div>
+    </div>`;
+  }).join('') : '<div class="empty-state"><div class="emoji">📊</div><p>Add expenses to see budget health</p></div>';
+ 
+  // Recent expenses
+  const recent = [...exp].sort((a,b)=>b.date?.localeCompare(a.date||'')).slice(0,5);
+  document.getElementById('recentExpenses').innerHTML = recent.length ? `
+    <table>
+      <thead><tr><th>Description</th><th>Category</th><th>Planned</th><th>Actual</th><th>Status</th></tr></thead>
+      <tbody>${recent.map(e=>`
+        <tr>
+          <td>${e.desc}</td>
+          <td><span class="tag ${ESSENTIAL_CATS.includes(e.category)?'tag-essential':'tag-non'}">${e.category}</span></td>
+          <td>${fmt(e.planned)}</td>
+          <td>${fmt(e.actual)}</td>
+          <td><span class="tag tag-${(e.status||'').toLowerCase()}">${e.status}</span></td>
+        </tr>`).join('')}
+      </tbody>
+    </table>` : '<div class="empty-state"><div class="emoji">💳</div><p>No expenses yet. Add your first expense!</p></div>';
+}
+ 
+// ── INCOME ──
+function renderIncome() {
+  const d = getStore();
+  const month = getMonth();
+  const inc = d.income.filter(i => i.date && i.date.startsWith(month));
+  const totalPlanned = inc.reduce((a,i)=>a+(+i.planned||0),0);
+  const totalActual = inc.reduce((a,i)=>a+(+i.actual||0),0);
+  document.getElementById('incomeTable').innerHTML = inc.length ? `
+    <table>
+      <thead><tr><th>Source</th><th>Date</th><th>Planned</th><th>Actual</th><th>Variance</th><th></th></tr></thead>
+      <tbody>
+        ${inc.map((i,idx)=>`<tr>
+          <td><strong>${i.source}</strong></td>
+          <td>${i.date||'-'}</td>
+          <td>${fmt(i.planned)}</td>
+          <td>${fmt(i.actual)}</td>
+          <td style="color:${(+i.actual-(+i.planned))>=0?'var(--accent)':'var(--accent3)'}">
+            ${fmt((+i.actual||0)-(+i.planned||0))}
+          </td>
+          <td><button class="delete-btn" onclick="deleteItem('income',${idx})">✕</button></td>
+        </tr>`).join('')}
+        <tr style="background:var(--surface2);font-weight:700">
+          <td>Total</td><td></td>
+          <td>${fmt(totalPlanned)}</td>
+          <td>${fmt(totalActual)}</td>
+          <td style="color:${totalActual>=totalPlanned?'var(--accent)':'var(--accent3)'}">${fmt(totalActual-totalPlanned)}</td>
+          <td></td>
+        </tr>
+      </tbody>
+    </table>` : '<div class="empty-state"><div class="emoji">💰</div><p>No income added yet</p></div>';
+}
+ 
+// ── EXPENSES ──
+function renderExpenses() {
+  const d = getStore();
+  const month = getMonth();
+  const exp = d.expenses.filter(e => e.date && e.date.startsWith(month));
+  const ess = exp.filter(e=>ESSENTIAL_CATS.includes(e.category));
+  const non = exp.filter(e=>!ESSENTIAL_CATS.includes(e.category));
+  const tPlanned = exp.reduce((a,e)=>a+(+e.planned||0),0);
+  const tActual = exp.reduce((a,e)=>a+(+e.actual||0),0);
+  const essActual = ess.reduce((a,e)=>a+(+e.actual||0),0);
+  const nonActual = non.reduce((a,e)=>a+(+e.actual||0),0);
+ 
+  document.getElementById('expenseStats').innerHTML = `
+    <div class="stat-card"><div class="stat-label">Total Planned</div><div class="stat-value">${fmt(tPlanned)}</div></div>
+    <div class="stat-card"><div class="stat-label">Total Actual</div><div class="stat-value red">${fmt(tActual)}</div></div>
+    <div class="stat-card"><div class="stat-label">Essentials</div><div class="stat-value teal">${fmt(essActual)}</div></div>
+    <div class="stat-card"><div class="stat-label">Non-Essentials</div><div class="stat-value" style="color:var(--nonessential)">${fmt(nonActual)}</div></div>
+  `;
+ 
+  const rows = (arr, label) => arr.length ? `
+    <tr style="background:var(--surface2)"><td colspan="7" style="font-size:0.72rem;text-transform:uppercase;letter-spacing:1.5px;color:var(--muted);padding:8px 20px">${label}</td></tr>
+    ${arr.map((e,idx)=>{
+      const realIdx = d.expenses.indexOf(e);
+      return `<tr>
+        <td>${e.desc}</td>
+        <td><span class="tag ${ESSENTIAL_CATS.includes(e.category)?'tag-essential':'tag-non'}">${e.category}</span></td>
+        <td>${e.date||'-'}</td>
+        <td>${fmt(e.planned)}</td>
+        <td>${fmt(e.actual)}</td>
+        <td><span class="tag tag-${(e.status||'').toLowerCase()}">${e.status}</span></td>
+        <td><button class="delete-btn" onclick="deleteItem('expenses',${realIdx})">✕</button></td>
+      </tr>`;
+    }).join('')}
+    <tr style="background:var(--surface2);font-weight:600">
+      <td colspan="3" style="padding:10px 20px;font-size:0.82rem">Subtotal ${label}</td>
+      <td>${fmt(arr.reduce((a,e)=>a+(+e.planned||0),0))}</td>
+      <td>${fmt(arr.reduce((a,e)=>a+(+e.actual||0),0))}</td>
+      <td colspan="2"></td>
+    </tr>
+  ` : '';
+ 
+  document.getElementById('expenseTable').innerHTML = exp.length ? `
+    <table>
+      <thead><tr><th>Description</th><th>Category</th><th>Date</th><th>Planned</th><th>Actual</th><th>Status</th><th></th></tr></thead>
+      <tbody>
+        ${rows(ess,'Essentials')}${rows(non,'Non-Essentials')}
+        <tr style="background:#1a2200;font-weight:700">
+          <td colspan="3" style="padding:12px 20px">Grand Total</td>
+          <td>${fmt(tPlanned)}</td><td>${fmt(tActual)}</td><td colspan="2"></td>
+        </tr>
+      </tbody>
+    </table>` : '<div class="empty-state"><div class="emoji">💳</div><p>No expenses yet. Add your first!</p></div>';
+}
+ 
+// ── SAVINGS ──
+function renderSavings() {
+  const d = getStore();
+  const el = document.getElementById('goalsGrid');
+  if (!d.goals.length) { el.innerHTML = '<div class="empty-state" style="grid-column:1/-1"><div class="emoji">🎯</div><p>No savings goals yet</p></div>'; return; }
+  el.innerHTML = d.goals.map((g,i)=>{
+    const pct = g.target>0?Math.min(100,Math.round((+g.current/+g.target)*100)):0;
+    const color = pct>=100?'var(--accent)':pct>=50?'var(--saving)':'var(--accent3)';
+    return `<div class="goal-card">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start">
+        <div>
+          <div class="goal-name">${g.name}</div>
+          <div class="goal-meta">Monthly contribution: ${fmt(g.monthly)}${g.date?' · Target: '+g.date:''}</div>
+        </div>
+        <button class="delete-btn" onclick="deleteItem('goals',${i})">✕</button>
+      </div>
+      <div class="goal-amounts">
+        <span style="color:${color}">${fmt(g.current)} saved</span>
+        <span style="color:var(--muted)">${fmt(g.target)}</span>
+      </div>
+      <div class="progress-wrap"><div class="progress-bar" style="width:${pct}%;background:${color}"></div></div>
+      <div style="font-size:0.75rem;color:var(--muted);margin-top:6px">${pct}% complete${pct>=100?' 🎉':''}</div>
+    </div>`;
+  }).join('');
+}
+ 
+// ── INTENTIONS ──
+let intentionFilter = 'all';
+function filterIntentions(period, el) {
+  intentionFilter = period;
+  document.querySelectorAll('.tab-pill').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');
+  renderIntentions();
+}
+function renderIntentions() {
+  const d = getStore();
+  let items = intentionFilter==='all' ? d.intentions : d.intentions.filter(i=>i.period===intentionFilter);
+  const el = document.getElementById('intentionsGrid');
+  if (!items.length) { el.innerHTML = '<div class="empty-state" style="grid-column:1/-1"><div class="emoji">💡</div><p>No intentions yet</p></div>'; return; }
+  el.innerHTML = items.map((item)=>{
+    const realIdx = d.intentions.indexOf(item);
+    return `<div class="intention-card">
+      <div class="intention-check ${item.done?'done':''}" onclick="toggleIntention(${realIdx})">${item.done?'✓':''}</div>
+      <div style="flex:1">
+        <div class="intention-text ${item.done?'done':''}">${item.text}</div>
+        <div class="intention-period">${item.period}</div>
+      </div>
+      <button class="delete-btn" onclick="deleteItem('intentions',${realIdx})">✕</button>
+    </div>`;
+  }).join('');
+}
+function toggleIntention(idx) {
+  const d = getStore();
+  d.intentions[idx].done = !d.intentions[idx].done;
+  saveStore(d); renderIntentions();
+}
+ 
+// ── ACCOUNTS ──
+function renderAccounts() {
+  const d = getStore();
+  const el = document.getElementById('accountsGrid');
+  const icons = {bank:'🏦',card:'💳',invest:'📈',savings:'🏧'};
+  if (!d.accounts.length) { el.innerHTML = '<div class="empty-state" style="grid-column:1/-1"><div class="emoji">🏦</div><p>No accounts yet</p></div>'; return; }
+  el.innerHTML = d.accounts.map((a,i)=>`
+    <div class="account-card ${a.type}">
+      <div class="account-type">${icons[a.type]||'🏦'} ${a.type}</div>
+      <div class="account-name">${a.name}</div>
+      <div class="account-number">•••• •••• •••• ${a.number||'????'}</div>
+      <div class="account-balance">${fmt(a.balance)}</div>
+      <button class="delete-btn" style="position:absolute;top:12px;right:12px" onclick="deleteItem('accounts',${i})">✕</button>
+    </div>`).join('');
+}
+ 
+// ── REPORT ──
+function renderReport() {
+  const d = getStore();
+  const month = getMonth();
+  const sel = document.getElementById('monthSelect');
+  document.getElementById('reportMonth').textContent = sel.options[sel.selectedIndex].text;
+ 
+  const inc = d.income.filter(i=>i.date&&i.date.startsWith(month));
+  const exp = d.expenses.filter(e=>e.date&&e.date.startsWith(month));
+  const ess = exp.filter(e=>ESSENTIAL_CATS.includes(e.category));
+  const non = exp.filter(e=>!ESSENTIAL_CATS.includes(e.category));
+ 
+  const totalInc = inc.reduce((a,i)=>a+(+i.actual||0),0);
+  const essTotal = ess.reduce((a,e)=>a+(+e.actual||0),0);
+  const nonTotal = non.reduce((a,e)=>a+(+e.actual||0),0);
+  const expTotal = essTotal + nonTotal;
+  const net = totalInc - expTotal;
+  const savingsTotal = d.goals.reduce((a,g)=>a+(+g.monthly||0),0);
+ 
+  document.getElementById('reportCard').innerHTML = `
+    <div class="report-section">
+      <h4>Income</h4>
+      ${inc.map(i=>`<div class="report-row"><span>${i.source}</span><span>${fmt(i.actual)}</span></div>`).join('')||'<div class="report-row" style="color:var(--muted)"><span>No income</span><span>-</span></div>'}
+      <div class="report-total"><span>Total Income</span><span style="color:var(--accent)">${fmt(totalInc)}</span></div>
+    </div>
+    <div class="report-section">
+      <h4>Essential Expenses</h4>
+      ${ess.map(e=>`<div class="report-row"><span>${e.desc} <small style="color:var(--muted)">(${e.category})</small></span><span>${fmt(e.actual)}</span></div>`).join('')||'<div class="report-row" style="color:var(--muted)"><span>None</span><span>-</span></div>'}
+      <div class="report-total"><span>Total Essential</span><span style="color:var(--essential)">${fmt(essTotal)}</span></div>
+    </div>
+    <div class="report-section">
+      <h4>Non-Essential Expenses</h4>
+      ${non.map(e=>`<div class="report-row"><span>${e.desc} <small style="color:var(--muted)">(${e.category})</small></span><span>${fmt(e.actual)}</span></div>`).join('')||'<div class="report-row" style="color:var(--muted)"><span>None</span><span>-</span></div>'}
+      <div class="report-total"><span>Total Non-Essential</span><span style="color:var(--nonessential)">${fmt(nonTotal)}</span></div>
+    </div>
+    <div style="border-top:2px solid var(--accent);padding-top:14px;margin-top:4px">
+      <div class="report-total"><span>Total Expenses</span><span style="color:var(--accent3)">${fmt(expTotal)}</span></div>
+      <div class="report-total"><span>Net Position</span><span style="color:${net>=0?'var(--accent)':'var(--accent3)'}">${fmt(net)}</span></div>
+    </div>
+  `;
+ 
+  document.getElementById('reportSummaryBox').innerHTML = `
+    <div class="stat-label" style="margin-bottom:12px">Summary</div>
+    <div class="report-row"><span>Income</span><span style="color:var(--accent)">${fmt(totalInc)}</span></div>
+    <div class="report-row"><span>Total Spent</span><span style="color:var(--accent3)">${fmt(expTotal)}</span></div>
+    <div class="report-row"><span>Savings Contributions</span><span style="color:var(--saving)">${fmt(savingsTotal)}</span></div>
+    <div class="report-row" style="border-bottom:none"><span><strong>Net</strong></span><span style="font-weight:700;color:${net>=0?'var(--accent)':'var(--accent3)'}">${fmt(net)}</span></div>
+  `;
+ 
+  // Bar chart
+  const cats = [...new Set(exp.map(e=>e.category))];
+  drawBarChart('barChart', cats, cats.map(c=>exp.filter(e=>e.category===c).reduce((a,e)=>a+(+e.planned||0),0)), cats.map(c=>exp.filter(e=>e.category===c).reduce((a,e)=>a+(+e.actual||0),0)));
+}
+ 
+// ── GRAPHS ──
+function renderGraphs() {
+  const d = getStore();
+  const month = getMonth();
+  const exp = d.expenses.filter(e=>e.date&&e.date.startsWith(month));
+  const inc = d.income.filter(i=>i.date&&i.date.startsWith(month));
+  const ess = exp.filter(e=>ESSENTIAL_CATS.includes(e.category)).reduce((a,e)=>a+(+e.actual||0),0);
+  const non = exp.filter(e=>!ESSENTIAL_CATS.includes(e.category)).reduce((a,e)=>a+(+e.actual||0),0);
+ 
+  drawDonut('pieChart', [{label:'Essential',value:ess,color:'#4af0b4'},{label:'Non-Essential',value:non,color:'#f0a84a'}]);
+ 
+  const totalInc = inc.reduce((a,i)=>a+(+i.actual||0),0);
+  const totalExp = ess+non;
+  drawLineChart('lineChart', ['Income','Expenses','Savings'], [totalInc, totalExp, Math.max(0,totalInc-totalExp)]);
+ 
+  const cats = [...new Set(exp.map(e=>e.category))];
+  drawBarChart('categoryBar', cats, cats.map(c=>exp.filter(e=>e.category===c).reduce((a,e)=>a+(+e.planned||0),0)), cats.map(c=>exp.filter(e=>e.category===c).reduce((a,e)=>a+(+e.actual||0),0)));
+}
+ 
+// ── CANVAS CHARTS ──
+function drawDonut(id, data) {
+  const canvas = document.getElementById(id);
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  const W = canvas.width, H = canvas.height, R = Math.min(W,H)/2-10;
+  ctx.clearRect(0,0,W,H);
+  const total = data.reduce((a,d)=>a+d.value,0);
+  if (!total) { ctx.fillStyle='#333'; ctx.beginPath(); ctx.arc(W/2,H/2,R,0,Math.PI*2); ctx.fill(); return; }
+  let start = -Math.PI/2;
+  data.forEach(d => {
+    const slice = (d.value/total)*Math.PI*2;
+    ctx.beginPath(); ctx.moveTo(W/2,H/2);
+    ctx.arc(W/2,H/2,R,start,start+slice);
+    ctx.closePath(); ctx.fillStyle = d.color; ctx.fill();
+    start += slice;
+  });
+  ctx.beginPath(); ctx.arc(W/2,H/2,R*0.55,0,Math.PI*2);
+  ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--bg')||'#0f0f0f';
+  ctx.fill();
+}
+ 
+function drawBarChart(id, labels, planned, actual) {
+  const canvas = document.getElementById(id);
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  const W = canvas.width = canvas.offsetWidth||600, H = canvas.height;
+  ctx.clearRect(0,0,W,H);
+  if (!labels.length) return;
+  const pad = {t:10,b:40,l:10,r:10};
+  const chartW = W-pad.l-pad.r, chartH = H-pad.t-pad.b;
+  const max = Math.max(...planned,...actual,1);
+  const barW = Math.floor(chartW/labels.length*0.35);
+  const gap = chartW/labels.length;
+  labels.forEach((label,i) => {
+    const x = pad.l + i*gap + gap*0.1;
+    const ph = (planned[i]/max)*chartH;
+    const ah = (actual[i]/max)*chartH;
+    ctx.fillStyle = '#2a3a0a'; ctx.fillRect(x, pad.t+chartH-ph, barW, ph);
+    ctx.fillStyle = '#c8f04a'; ctx.fillRect(x+barW+3, pad.t+chartH-ah, barW, ah);
+    ctx.fillStyle = '#666'; ctx.font = '10px DM Sans'; ctx.textAlign = 'center';
+    const cx = x + barW + 3;
+    ctx.fillText(label.length>8?label.slice(0,8)+'..':label, cx, H-8);
+  });
+  ctx.fillStyle='#555'; ctx.font='10px DM Sans';
+  ctx.fillRect(W-120,10,12,10); ctx.fillStyle='#2a3a0a'; ctx.fillRect(W-120,10,12,10);
+  ctx.fillStyle='#888'; ctx.fillText('Planned',W-100,20);
+  ctx.fillRect(W-120,26,12,10); ctx.fillStyle='#c8f04a'; ctx.fillRect(W-120,26,12,10);
+  ctx.fillStyle='#888'; ctx.fillText('Actual',W-100,36);
+}
+ 
+function drawLineChart(id, labels, values) {
+  const canvas = document.getElementById(id);
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  const W = canvas.width = canvas.offsetWidth||400, H = canvas.height;
+  ctx.clearRect(0,0,W,H);
+  const pad = {t:20,b:40,l:40,r:20};
+  const cW=W-pad.l-pad.r, cH=H-pad.t-pad.b;
+  const max = Math.max(...values,1);
+  const colors = ['#c8f04a','#f04a7a','#4a9ff0'];
+  const pts = values.map((v,i)=>({x:pad.l+i*(cW/(values.length-1||1)), y:pad.t+cH-(v/max)*cH}));
+  ctx.strokeStyle='#333'; ctx.lineWidth=1;
+  [0.25,0.5,0.75,1].forEach(r=>{
+    ctx.beginPath(); ctx.moveTo(pad.l,pad.t+cH*(1-r)); ctx.lineTo(pad.l+cW,pad.t+cH*(1-r)); ctx.stroke();
+    ctx.fillStyle='#555'; ctx.font='10px DM Sans'; ctx.textAlign='right';
+    ctx.fillText('R'+(max*r/1000).toFixed(0)+'k',pad.l-4,pad.t+cH*(1-r)+4);
+  });
+  ctx.beginPath(); pts.forEach((p,i)=>i===0?ctx.moveTo(p.x,p.y):ctx.lineTo(p.x,p.y));
+  ctx.strokeStyle='#c8f04a'; ctx.lineWidth=2.5; ctx.stroke();
+  pts.forEach((p,i)=>{
+    ctx.beginPath(); ctx.arc(p.x,p.y,5,0,Math.PI*2);
+    ctx.fillStyle=colors[i]||'#c8f04a'; ctx.fill();
+    ctx.fillStyle='#888'; ctx.font='11px DM Sans'; ctx.textAlign='center';
+    ctx.fillText(labels[i],p.x,H-8);
+  });
+}
+ 
+// ── CRUD ──
+function addIncome() {
+  const d = getStore();
+  const month = getMonth();
+  const date = document.getElementById('inc-date').value || month+'-01';
+  d.income.push({
+    source: document.getElementById('inc-source').value||'Income',
+    planned: document.getElementById('inc-planned').value||0,
+    actual: document.getElementById('inc-actual').value||0,
+    date
+  });
+  saveStore(d); closeModal('income-modal');
+  ['inc-source','inc-planned','inc-actual','inc-date'].forEach(id=>document.getElementById(id).value='');
+  render();
+}
+ 
+function addExpense() {
+  const d = getStore();
+  const month = getMonth();
+  const date = document.getElementById('exp-date').value || month+'-01';
+  d.expenses.push({
+    desc: document.getElementById('exp-desc').value||'Expense',
+    category: document.getElementById('exp-cat').value,
+    planned: document.getElementById('exp-planned').value||0,
+    actual: document.getElementById('exp-actual').value||0,
+    status: document.getElementById('exp-status').value,
+    date
+  });
+  saveStore(d); closeModal('expense-modal');
+  ['exp-desc','exp-planned','exp-actual','exp-date'].forEach(id=>document.getElementById(id).value='');
+  render();
+}
+ 
+function addGoal() {
+  const d = getStore();
+  d.goals.push({
+    name: document.getElementById('sav-name').value||'Goal',
+    target: document.getElementById('sav-target').value||0,
+    current: document.getElementById('sav-current').value||0,
+    monthly: document.getElementById('sav-monthly').value||0,
+    date: document.getElementById('sav-date').value
+  });
+  saveStore(d); closeModal('savings-modal');
+  ['sav-name','sav-target','sav-current','sav-monthly','sav-date'].forEach(id=>document.getElementById(id).value='');
+  render();
+}
+ 
+function addIntention() {
+  const d = getStore();
+  d.intentions.push({
+    text: document.getElementById('int-text').value||'Intention',
+    period: document.getElementById('int-period').value,
+    done: false
+  });
+  saveStore(d); closeModal('intention-modal');
+  document.getElementById('int-text').value='';
+  renderIntentions();
+}
+ 
+function addAccount() {
+  const d = getStore();
+  d.accounts.push({
+    name: document.getElementById('acc-name').value||'Account',
+    type: document.getElementById('acc-type').value,
+    number: document.getElementById('acc-number').value||'????',
+    balance: document.getElementById('acc-balance').value||0
+  });
+  saveStore(d); closeModal('account-modal');
+  ['acc-name','acc-number','acc-balance'].forEach(id=>document.getElementById(id).value='');
+  renderAccounts();
+}
+ 
+function deleteItem(list, idx) {
+  const d = getStore();
+  d[list].splice(idx,1);
+  saveStore(d); render();
+}
+ 
+// ── MODAL ──
+function openModal(id) { document.getElementById(id).classList.add('open'); }
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+document.querySelectorAll('.overlay').forEach(o=>o.addEventListener('click',e=>{if(e.target===o)o.classList.remove('open')}));
+ 
+// ── EXPORT ──
+function exportData() {
+  const d = getStore();
+  const blob = new Blob([JSON.stringify(d,null,2)],{type:'application/json'});
+  const a = document.createElement('a'); a.href=URL.createObjectURL(blob);
+  a.download='finance-data.json'; a.click();
+}
+ 
+// ── INIT ──
 render();
-save();
-}
-
-function show(id){
-document.querySelectorAll(".section").forEach(s=>s.classList.remove("active"));
-document.getElementById(id).classList.add("active");
-}
-
-// ---------- ADD ----------
-function addIncome(){
-data[month].income.push({name:incomeName.value,amount:+incomeAmount.value});
-save(); render();
-}
-
-function addCategory(){
-if(newCategory.value){
-data[month].categories.push({
-name:newCategory.value,
-type:"non" // default
-});
-
-newCategory.value="";
-save(); 
-render();
-}
-}
-
-function addExpense(){
-data[month].expenses.push({
-cat:expenseCat.value,
-type:expenseType.value,
-name:expenseName.value,
-planned:+expensePlanned.value,
-actual:+expenseActual.value,
-status:expenseStatus.value
-});
-save(); render();
-}
-
-function addGoal(){
-data[month].goals.push({
-name:goalName.value,
-target:+goalTarget.value,
-saved:+goalSaved.value
-});
-save(); render();
-}
-
-function addIntent(){
-data[month].intentions.push({
-text:intentText.value,
-type:intentType.value
-});
-save(); render();
-}
-
-// ---------- EDIT / DELETE ----------
-function deleteItem(type,i){
-data[month][type].splice(i,1);
-save(); render();
-}
-
-function editItem(type,i){
-let item = data[month][type][i];
-let newVal = prompt("Edit value:", item.name || item.text);
-if(newVal){
-if(type==="income") item.name=newVal;
-if(type==="expenses") item.name=newVal;
-if(type==="goals") item.name=newVal;
-if(type==="intentions") item.text=newVal;
-}
-save(); render();
-}
-
-// ---------- RENDER ----------
-function render(){
-
-initMonth(month);
-
-// categories
-expenseCat.innerHTML="";
-data[month].categories.forEach(c=>{
-expenseCat.innerHTML += `
-<option value="${c.name}" data-type="${c.type}">
-${c.name}
-</option>`;
-});
-
-expenseCat.addEventListener("change", function(){
-const selected = this.options[this.selectedIndex];
-const type = selected.getAttribute("data-type");
-
-if(type){
-document.getElementById("expenseType").value = type;
-}
-});
-
-// income
-let income=0;
-incomeTable.innerHTML="";
-data[month].income.forEach((i,idx)=>{
-income+=i.amount;
-incomeTable.innerHTML+=`
-<tr>
-<td>${i.name}</td>
-<td>${i.amount}</td>
-<td class="actions">
-<button onclick="editItem('income',${idx})">Edit</button>
-<button onclick="deleteItem('income',${idx})">Delete</button>
-</td>
-</tr>`;
-});
-
-// expenses
-let planned=0, actual=0, essential=0, non=0, paid=0, pending=0;
-
-expenseTable.innerHTML="";
-data[month].expenses.forEach((e,idx)=>{
-
-planned+=e.planned;
-actual+=e.actual;
-
-if(e.type==="essential") essential+=e.actual;
-else non+=e.actual;
-
-if(e.status==="paid") paid+=e.actual;
-if(e.status==="pending") pending+=e.planned;
-
-expenseTable.innerHTML+=`
-<tr>
-<td>${e.cat}</td>
-<td>${e.name}</td>
-<td>${e.planned}</td>
-<td>${e.actual}</td>
-<td>${e.status}</td>
-<td>
-<button onclick="editItem('expenses',${idx})">Edit</button>
-<button onclick="deleteItem('expenses',${idx})">Delete</button>
-</td>
-</tr>`;
-});
-
-// goals
-let savings=0;
-goalTable.innerHTML="";
-data[month].goals.forEach((g,idx)=>{
-savings+=g.saved;
-goalTable.innerHTML+=`
-<tr>
-<td>${g.name}</td>
-<td>${g.saved}/${g.target}</td>
-<td>
-<button onclick="editItem('goals',${idx})">Edit</button>
-<button onclick="deleteItem('goals',${idx})">Delete</button>
-</td>
-</tr>`;
-});
-
-// intentions
-intentList.innerHTML="";
-data[month].intentions.forEach((i,idx)=>{
-intentList.innerHTML+=`
-<li>
-${i.type}: ${i.text}
-<button onclick="editItem('intentions',${idx})">Edit</button>
-<button onclick="deleteItem('intentions',${idx})">Delete</button>
-</li>`;
-});
-
-// dashboard
-incomeTotal.textContent=income;
-plannedTotal.textContent=planned;
-actualTotal.textContent=actual;
-varianceTotal.textContent=(actual-planned);
-
-essentialTotal.textContent=essential;
-nonTotal.textContent=non;
-paidTotal.textContent=paid;
-pendingTotal.textContent=pending;
-savingsTotal.textContent=savings;
-renderChart(essential, non, savings);
-
-// insights
-generateInsights(income,actual,planned,savings,pending);
-generateComparison();
-
-}
-
-// ---------- INSIGHTS ----------
-function generateInsights(income,actual,planned,savings,pending){
-
-let text=[];
-
-if(actual>income) text.push("Spending exceeded income. Consider small adjustments.");
-else text.push("Spending is within income.");
-
-if(savings>0) text.push("You are building savings steadily.");
-
-if(pending>0) text.push("There are pending payments to prepare for.");
-
-insightsBox.innerHTML=text.map(t=>`<div>• ${t}</div>`).join("");
-
-}
-
-// ---------- COMPARISON ----------
-function generateComparison(){
-
-const months = Object.keys(data).sort();
-let idx = months.indexOf(month);
-
-if(idx<=0) return;
-
-let prev = data[months[idx-1]];
-let curr = data[month];
-
-let prevSpend = prev.expenses.reduce((s,e)=>s+e.actual,0);
-let currSpend = curr.expenses.reduce((s,e)=>s+e.actual,0);
-
-let diff = currSpend - prevSpend;
-
-let msg = diff>0
-? `Spending increased by ${diff} vs last month.`
-: `Spending decreased by ${Math.abs(diff)} vs last month.`;
-
-insightsBox.innerHTML += `<div>• ${msg}</div>`;
-
-}
-
-function renderChart(essential, non, savings){
-
-const canvas = document.getElementById("chart");
-if(!canvas) return;
-
-// destroy old chart safely
-if(window.chartInstance){
-window.chartInstance.destroy();
-}
-
-// ensure numbers
-essential = Number(essential) || 0;
-non = Number(non) || 0;
-savings = Number(savings) || 0;
-
-// avoid blank crash
-if(essential === 0 && non === 0 && savings === 0){
-canvas.getContext("2d").clearRect(0,0,canvas.width,canvas.height);
-return;
-}
-
-// create chart
-window.chartInstance = new Chart(canvas.getContext("2d"), {
-type: "pie",
-data: {
-labels: ["Essential","Non-Essential","Savings"],
-datasets: [{
-data: [essential, non, savings]
-}]
-},
-options: {
-responsive: true,
-plugins: {
-legend: { position: "bottom" }
-}
-}
-});
-
-}
-render();
-
 </script>
-
 </body>
 </html>
